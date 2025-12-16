@@ -288,6 +288,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 1660267597949087769, guid: 1939c830973de5c4298d0929ce1043d6, type: 3}
   playerConfigRegistry: {fileID: 11400000, guid: 02c54055b11610a4f9cea3d1d032cae2, type: 2}
+  obstaclePrefab: {fileID: 6307581381198073029, guid: f7027b59d37f2e646ba657f501ba7800, type: 3}
+  obstacleConfigRegistry: {fileID: 11400000, guid: 43059ab9952f39c4b80f6c31efd78b17, type: 2}
 --- !u!114 &783102343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -379,6 +381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c16c6c6bcd56a44489154dee3d85205, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  coinEffectPrefab: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

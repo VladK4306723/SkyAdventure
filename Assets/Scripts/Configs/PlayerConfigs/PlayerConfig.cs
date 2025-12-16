@@ -1,10 +1,13 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Game/Player/PlayerConfig")]
-public sealed class PlayerConfig : ScriptableObject
+public sealed class PlayerConfig : ScriptableObject, IConfigWithKey<PlayerType>
 {
-    public PlayerType Type;
+    [SerializeField] private PlayerType _type;
+    public PlayerType Key => _type;
+
     public float TurnSpeed;
     public float SpeedMultiplier;
     public Sprite Sprite;
+    
 }

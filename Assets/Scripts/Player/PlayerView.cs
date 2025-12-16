@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +8,9 @@ public sealed class PlayerView : MonoBehaviour
 
     private PlayerInputActions _input;
     private float _horizontal;
+
+    public event Action<ObstacleView> HitObstacle;
+
 
     public float HorizontalInput => _horizontal;
 
@@ -42,5 +46,13 @@ public sealed class PlayerView : MonoBehaviour
     public void SetRotation(float zAngle)
     {
         transform.rotation = Quaternion.Euler(0f, 0f, zAngle);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.TryGetComponent<ObstacleView>(out var obstacle))
+        {
+            HitObstacle?.Invoke(obstacle);
+        }
     }
 }

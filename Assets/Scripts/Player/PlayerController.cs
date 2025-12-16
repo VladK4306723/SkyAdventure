@@ -11,12 +11,23 @@ public sealed class PlayerController : IGameTick
     private const float BaseHorizontalSpeed = 1f;
     private const float MaxTiltFactor = 45f;
 
-    public PlayerController(PlayerModel model, PlayerView view)
+    private readonly float _minX;
+    private readonly float _maxX;
+
+    public PlayerView View => _view;
+
+
+    public PlayerController(
+        PlayerModel model,
+        PlayerView view,
+        CameraBounds bounds)
     {
         _model = model;
         _view = view;
 
         _currentX = view.transform.position.x;
+        _minX = bounds.Left;
+        _maxX = bounds.Right;
     }
 
     public void Tick(float dt)
@@ -57,6 +68,7 @@ public sealed class PlayerController : IGameTick
         _view.SetRotation(_currentTilt);
 
         Vector3 pos = _view.transform.position;
+        _currentX = Mathf.Clamp(_currentX, _minX, _maxX);
         pos.x = _currentX;
         _view.transform.position = pos;
     }
