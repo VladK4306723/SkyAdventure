@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour, IGameManager
     [SerializeField] private GameObject coinEffectPrefab;
     [SerializeField] private float gameSpeed = 3f;
 
+    private ObstacleSpawner _spawner;
     private PlayerController _player;
     private int _score;
 
@@ -24,21 +25,36 @@ public class GameManager : MonoBehaviour, IGameManager
     {
         StartGame(PlayerType.Default);
 
+        _spawner = new ObstacleSpawner(
+        _obstacleFactory,
+        _bounds,
+        this,
+        patternInterval: 1f,
+        verticalSpacing: 0.6f,
+        gameSpeed: gameSpeed
+    );
+
+        _spawner.Spawned += RegisterObstacle;
         _player.View.HitObstacle += OnPlayerHitObstacle;
     }
+
+    private void RegisterObstacle(ObstacleView obstacle)
+    {
+        _ticks.Add(obstacle);
+    }
+
 
     public void StartGame(PlayerType playerType)
     {
         _player = _playerFactory.Create(playerType);
-
-        var obstacle = _obstacleFactory.Create(ObstacleType.Coin, 2f, 2f, gameSpeed);
         _ticks.Add(_player);
-        _ticks.Add(obstacle);
     }
 
     private void Update()
     {
         float dt = Time.deltaTime;
+
+        _spawner.Tick(dt);
 
         for (int i = _ticks.Count - 1; i >= 0; i--)
         {
@@ -48,8 +64,10 @@ public class GameManager : MonoBehaviour, IGameManager
             if (tickable is IDespawnable despawnable &&
     despawnable.ShouldDespawn(_bounds.Bottom))
             {
+                var obstacle = (ObstacleView)tickable;
                 _ticks.RemoveAt(i);
-                ((ObstacleView)tickable).Consume();
+                _obstacleFactory.Release(obstacle);
+
             }
 
         }
@@ -70,7 +88,9 @@ public class GameManager : MonoBehaviour, IGameManager
 
         SpawnCoinEffect(coin.transform.position);
 
-        coin.Consume();
+        _ticks.Remove(coin);
+        _obstacleFactory.Release(coin);
+
     }
 
     private void SpawnCoinEffect(Vector3 position)
@@ -80,6 +100,10 @@ public class GameManager : MonoBehaviour, IGameManager
 
     private void OnDestroy()
     {
-        _player.View.HitObstacle -= OnPlayerHitObstacle;
+        _spawner.Spawned -= RegisterObstacle;
+
+        if (_player != null)
+            _player.View.HitObstacle -= OnPlayerHitObstacle;
     }
+
 }

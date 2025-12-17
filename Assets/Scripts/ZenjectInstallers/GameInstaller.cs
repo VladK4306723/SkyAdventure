@@ -25,10 +25,14 @@ public sealed class GameInstaller : MonoInstaller
 
         Container.BindInstance(playerConfigRegistry);
 
+        Container.Bind<ObstaclePool>()
+            .AsSingle()
+            .WithArguments(obstaclePrefab, 16);
+
         Container.Bind<IObstacleFactory>()
             .To<ObstacleFactory>()
-            .AsSingle()
-            .WithArguments(obstaclePrefab);
+            .AsSingle();
+
 
         Container.BindInstance(obstacleConfigRegistry);
     }

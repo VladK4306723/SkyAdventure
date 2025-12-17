@@ -4,35 +4,40 @@ using Zenject;
 public interface IObstacleFactory
 {
     ObstacleView Create(ObstacleType type, float x, float y, float gameSpeed);
+    void Release(ObstacleView obstacle);
 }
 
-public class ObstacleFactory : IObstacleFactory
+public sealed class ObstacleFactory : IObstacleFactory
 {
-    private readonly DiContainer _container;
-    private readonly ObstacleConfigRegistry _registry;
-    private readonly ObstacleView _prefab;
+    private readonly ObstacleConfigRegistry _configs;
+    private readonly ObstaclePool _pool;
 
     public ObstacleFactory(
-        DiContainer container,
-        ObstacleConfigRegistry registry,
-        ObstacleView prefab)
+        ObstacleConfigRegistry configs,
+        ObstaclePool pool)
     {
-        _container = container;
-        _registry = registry;
-        _prefab = prefab;
+        _configs = configs;
+        _pool = pool;
     }
 
-    public ObstacleView Create(ObstacleType type, float x, float y, float gameSpeed)
+    public ObstacleView Create(
+        ObstacleType type,
+        float x,
+        float y,
+        float speed)
     {
-        var config = _registry.Get(type);
+        var config = _configs.Get(type);
 
-        var view = _container
-            .InstantiatePrefabForComponent<ObstacleView>(_prefab);
+        var obstacle = _pool.Get();
+        obstacle.transform.position = new Vector3(x, y, 0f);
+        obstacle.Init(config, speed);
 
-        view.transform.position = new Vector3(x, y, 0f);
-        view.Init(config, gameSpeed);
+        return obstacle;
+    }
 
-        return view;
+    public void Release(ObstacleView obstacle)
+    {
+        _pool.Release(obstacle);
     }
 }
 
