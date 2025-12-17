@@ -59,8 +59,6 @@ public sealed class ObstacleSpawner
         var type = (ObstaclePatternType)
             Random.Range(0, System.Enum.GetValues(typeof(ObstaclePatternType)).Length);
 
-        Debug.Log($"Spawning pattern: {type}");
-
         yield return _coroutineHost.StartCoroutine(SpawnPatternRoutine(type));
 
         yield return new WaitForSeconds(_patternInterval);
@@ -105,7 +103,7 @@ public sealed class ObstacleSpawner
 
     private IEnumerator SpawnSingle()
     {
-        SpawnCoin(RandomX());
+        SpawnStar(RandomX());
         yield break;
     }
 
@@ -116,7 +114,7 @@ public sealed class ObstacleSpawner
 
         foreach (int i in indices)
         {
-            SpawnCoin(X_POSITIONS[i]);
+            SpawnStar(X_POSITIONS[i]);
         }
 
         yield break;
@@ -126,7 +124,7 @@ public sealed class ObstacleSpawner
     {
         for (int i = 0; i < X_POSITIONS.Length; i++)
         {
-            SpawnCoin(X_POSITIONS[i]);
+            SpawnStar(X_POSITIONS[i]);
             yield return new WaitForSeconds(SpawnDelay);
         }
     }
@@ -135,7 +133,7 @@ public sealed class ObstacleSpawner
     {
         for (int i = X_POSITIONS.Length - 1; i >= 0; i--)
         {
-            SpawnCoin(X_POSITIONS[i]);
+            SpawnStar(X_POSITIONS[i]);
             yield return new WaitForSeconds(SpawnDelay);
         }
     }
@@ -144,13 +142,13 @@ public sealed class ObstacleSpawner
     {
         int start = Random.Range(0, X_POSITIONS.Length - 1);
 
-        SpawnCoin(X_POSITIONS[start]);
-        SpawnCoin(X_POSITIONS[start + 1]);
+        SpawnStar(X_POSITIONS[start]);
+        SpawnStar(X_POSITIONS[start + 1]);
 
         yield return new WaitForSeconds(SpawnDelay);
 
-        SpawnCoin(X_POSITIONS[start]);
-        SpawnCoin(X_POSITIONS[start + 1]);
+        SpawnStar(X_POSITIONS[start]);
+        SpawnStar(X_POSITIONS[start + 1]);
     }
 
     private IEnumerator SpawnSmile()
@@ -169,7 +167,7 @@ public sealed class ObstacleSpawner
             {
                 foreach (float x in row)
                 {
-                    SpawnCoin(x);
+                    SpawnStar(x);
                 }
             }
 
@@ -179,10 +177,10 @@ public sealed class ObstacleSpawner
 
     // ───────────────────────── HELPERS ─────────────────────────
 
-    private void SpawnCoin(float x)
+    private void SpawnStar(float x)
     {
         ObstacleView obstacle = _factory.Create(
-            ObstacleType.Coin,
+            ObstacleType.Star,
             x,
             _bounds.Top + 0.5f,
             _gameSpeed

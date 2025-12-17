@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using Zenject;
 
@@ -12,7 +13,9 @@ public class GameManager : MonoBehaviour, IGameManager
     [Inject] private IPlayerFactory _playerFactory;
     [Inject] private IObstacleFactory _obstacleFactory;
     [Inject] private CameraBounds _bounds;
-    [SerializeField] private GameObject coinEffectPrefab;
+    [Inject] private PickupEffectView.Pool _starEffectPool;
+
+    [SerializeField] private PickupEffectView starEffectPrefab;
     [SerializeField] private float gameSpeed = 3f;
 
     private ObstacleSpawner _spawner;
@@ -76,27 +79,36 @@ public class GameManager : MonoBehaviour, IGameManager
 
     private void OnPlayerHitObstacle(ObstacleView obstacle)
     {
-        if (obstacle.Type == ObstacleType.Coin)
+        if (obstacle.Type == ObstacleType.Star)
         {
-            HandleCoin(obstacle);
+            HandleStar(obstacle);
         }
     }
 
-    private void HandleCoin(ObstacleView coin)
+    private void HandleStar(ObstacleView star)
     {
-        _score += 1;
+        var cfg = star.Config;
+        Vector3 pos = star.transform.position;
 
-        SpawnCoinEffect(coin.transform.position);
+        _score += (int)cfg.ActionValue;
 
-        _ticks.Remove(coin);
-        _obstacleFactory.Release(coin);
+        _ticks.Remove(star);
+        _obstacleFactory.Release(star);
 
+        SpawnStarEffect(pos, cfg);
+
+        Debug.Log($"Score: {_score}");
     }
 
-    private void SpawnCoinEffect(Vector3 position)
+    private void SpawnStarEffect(Vector3 position, ObstacleConfig config)
     {
-        Instantiate(coinEffectPrefab, position, Quaternion.identity);
+        var effect = _starEffectPool.Spawn();
+        effect.transform.position = position;
+        effect.SetPool(_starEffectPool);
+        effect.Init(config.Sprite, config.ActionValue);
     }
+
+
 
     private void OnDestroy()
     {

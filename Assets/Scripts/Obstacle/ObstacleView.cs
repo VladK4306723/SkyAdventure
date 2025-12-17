@@ -16,18 +16,28 @@ public class ObstacleView : MonoBehaviour, IObstacleView, IGameTick, IDespawnabl
 {
     private ObstacleType type;
     private float _speed;
+    private float _actionValue;
+    private Sprite _sprite;
+    private ObstacleConfig _config;
 
+    public float ActionValue => _actionValue;
     public ObstacleType Type => type;
+    public Sprite Sprite => _sprite;
+    public ObstacleConfig Config => _config;
 
     public void Init(ObstacleConfig config, float gameSpeed)
     {
+        _config = config;
+
         type = config.Key;
         _speed = gameSpeed;
+        _actionValue = config.ActionValue;
 
         var spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
         {
-            spriteRenderer.sprite = config.Sprite;
+            _sprite = config.Sprite;
+            spriteRenderer.sprite = _sprite;
         }
     }
 

@@ -7,7 +7,7 @@ public enum PlayerType
 
 public enum ObstacleType
 {
-    Coin
+    Star
 }
 
 public enum ObstaclePatternType

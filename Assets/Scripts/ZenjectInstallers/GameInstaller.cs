@@ -9,6 +9,7 @@ public sealed class GameInstaller : MonoInstaller
     [SerializeField] private ObstacleView obstaclePrefab;
     [SerializeField] private ObstacleConfigRegistry obstacleConfigRegistry;
 
+    [SerializeField] private PickupEffectView starEffectPrefab;
 
     public override void InstallBindings()
     {
@@ -35,5 +36,11 @@ public sealed class GameInstaller : MonoInstaller
 
 
         Container.BindInstance(obstacleConfigRegistry);
+
+        Container.BindMemoryPool<
+        PickupEffectView,
+        PickupEffectView.Pool>()
+        .FromComponentInNewPrefab(starEffectPrefab)
+        .UnderTransformGroup("FX_Pool");
     }
 }

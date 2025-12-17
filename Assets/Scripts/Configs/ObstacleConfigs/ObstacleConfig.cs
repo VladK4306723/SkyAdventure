@@ -6,6 +6,7 @@ public sealed class ObstacleConfig : ScriptableObject, IConfigWithKey<ObstacleTy
     [SerializeField] private ObstacleType _type;
     public ObstacleType Key => _type;
 
+    public float ActionValue;
     public Sprite Sprite;
 
 }
