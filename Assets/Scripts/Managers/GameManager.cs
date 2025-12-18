@@ -1,19 +1,24 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using Zenject;
 
-interface IGameManager
+interface IGameFlow
 {
     void StartGame(PlayerType playerType);
 }
 
-public class GameManager : MonoBehaviour, IGameManager
+interface IGameManager
+{
+}
+
+public class GameManager : MonoBehaviour, IGameFlow, IGameManager
 {
     [Inject] private IPlayerFactory _playerFactory;
     [Inject] private IObstacleFactory _obstacleFactory;
     [Inject] private CameraBounds _bounds;
     [Inject] private PickupEffectView.Pool _starEffectPool;
+    [Inject] private IUIManager _uiManager;
 
     [SerializeField] private PickupEffectView starEffectPrefab;
     [SerializeField] private float gameSpeed = 3f;
@@ -21,24 +26,14 @@ public class GameManager : MonoBehaviour, IGameManager
     private ObstacleSpawner _spawner;
     private PlayerController _player;
     private int _score;
+    private bool _isGameOver;
+    private bool _isGameRunning;
 
     private readonly List<IGameTick> _ticks = new();
 
     private void Start()
     {
-        StartGame(PlayerType.Default);
-
-        _spawner = new ObstacleSpawner(
-        _obstacleFactory,
-        _bounds,
-        this,
-        patternInterval: 1f,
-        verticalSpacing: 0.6f,
-        gameSpeed: gameSpeed
-    );
-
-        _spawner.Spawned += RegisterObstacle;
-        _player.View.HitObstacle += OnPlayerHitObstacle;
+        _uiManager.Show(UIWindowId.Home);
     }
 
     private void RegisterObstacle(ObstacleView obstacle)
@@ -49,12 +44,35 @@ public class GameManager : MonoBehaviour, IGameManager
 
     public void StartGame(PlayerType playerType)
     {
+        _isGameRunning = true;
+
+        _spawner = new ObstacleSpawner(
+        _obstacleFactory,
+        _bounds,
+        this,
+        patternInterval: 1f,
+        verticalSpacing: 0.6f,
+        gameSpeed: gameSpeed
+        );
+
         _player = _playerFactory.Create(playerType);
         _ticks.Add(_player);
+
+        _player.DangerMaxed += OnDangerLevelMaxed;
+        _spawner.Spawned += RegisterObstacle;
+        _player.View.HitObstacle += OnPlayerHitObstacle;
+
+        
     }
 
     private void Update()
     {
+        if (_isGameOver)
+            return;
+
+        if (!_isGameRunning)
+            return;
+
         float dt = Time.deltaTime;
 
         _spawner.Tick(dt);
@@ -106,6 +124,55 @@ public class GameManager : MonoBehaviour, IGameManager
         effect.transform.position = position;
         effect.SetPool(_starEffectPool);
         effect.Init(config.Sprite, config.ActionValue);
+    }
+
+    private void OnDangerLevelMaxed()
+    {
+        Debug.Log("BOOM");
+        _isGameOver = true;
+        _isGameRunning = false;
+
+        StopGame();
+
+        _uiManager.Show(UIWindowId.Home);
+    }
+
+    private void StopGame()
+    {
+        _isGameRunning = false;
+        _isGameOver = false;
+
+        _player.Cleanup();
+
+        if (_player != null)
+        {
+            _player.DangerMaxed -= OnDangerLevelMaxed;
+            _player.View.HitObstacle -= OnPlayerHitObstacle;
+        }
+
+        if (_spawner != null)
+        {
+            _spawner.Spawned -= RegisterObstacle;
+        }
+
+        for (int i = _ticks.Count - 1; i >= 0; i--)
+        {
+            if (_ticks[i] is ObstacleView obstacle)
+            {
+                _obstacleFactory.Release(obstacle);
+            }
+        }
+
+        _ticks.Clear();
+
+        if (_player != null)
+        {
+            Destroy(_player.View.gameObject);
+            _player = null;
+        }
+
+        _spawner = null;
+        _score = 0;
     }
 
 

@@ -34,6 +34,7 @@ public sealed class GameInstaller : MonoInstaller
             .To<ObstacleFactory>()
             .AsSingle();
 
+        Container.Bind<IDangerModel>().To<DangerModel>().AsSingle();
 
         Container.BindInstance(obstacleConfigRegistry);
 
@@ -42,5 +43,12 @@ public sealed class GameInstaller : MonoInstaller
         PickupEffectView.Pool>()
         .FromComponentInNewPrefab(starEffectPrefab)
         .UnderTransformGroup("FX_Pool");
+
+        Container.Bind<IUIManager>()
+    .FromComponentInHierarchy()
+    .AsSingle();
+
+        Container.Bind<IGameFlow>().FromComponentInHierarchy().AsSingle();
+
     }
 }

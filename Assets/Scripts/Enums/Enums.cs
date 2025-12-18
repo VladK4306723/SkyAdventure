@@ -20,3 +20,10 @@ public enum ObstaclePatternType
     WaveLeft
 }
 
+public enum UIWindowId
+{
+    Home,
+    Game,
+    Pause,
+    GameOver
+}
