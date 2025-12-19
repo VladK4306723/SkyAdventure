@@ -1,3 +1,5 @@
+using Zenject;
+
 public interface IGameProgressService
 {
     SessionData CurrentSession { get; }
@@ -8,6 +10,8 @@ public interface IGameProgressService
 
 public sealed class GameProgressService : IGameProgressService
 {
+    [Inject] private IDataManager _dataManager;
+
     public SessionData CurrentSession { get; private set; }
 
     public GameProgressService()
@@ -23,5 +27,6 @@ public sealed class GameProgressService : IGameProgressService
     public void EndSession(GameFinishReason reason)
     {
         CurrentSession.Finish(reason);
+        _dataManager.ApplySession(CurrentSession, reason);
     }
 }

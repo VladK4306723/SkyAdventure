@@ -54,5 +54,6 @@ public sealed class GameInstaller : MonoInstaller
 
         Container.Bind<IGameFlow>().FromComponentInHierarchy().AsSingle();
 
+        Container.Bind<IDataManager>().To<DataManager>().AsSingle();
     }
 }

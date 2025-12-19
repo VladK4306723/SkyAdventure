@@ -76,7 +76,6 @@ public sealed class PlayerController : IGameTick
             DangerMaxed?.Invoke();
         }
 
-        Debug.Log($"Danger Level: {_danger.Value:F2}");
     }
 
     private void UpdateTilt(float input, float dt)

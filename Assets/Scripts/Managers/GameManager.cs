@@ -233,7 +233,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
 
     private void OnDestroy()
     {
-        _spawner.Spawned -= RegisterObstacle;
+        //_spawner.Spawned -= RegisterObstacle;
 
         if (_player != null)
             _player.View.HitObstacle -= OnPlayerHitObstacle;
