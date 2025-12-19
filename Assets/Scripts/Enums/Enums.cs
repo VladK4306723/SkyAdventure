@@ -22,8 +22,19 @@ public enum ObstaclePatternType
 
 public enum UIWindowId
 {
+    Loading,
     Home,
     Game,
     Pause,
-    GameOver
+    GameOver,
+    Victory,
+    Record,
 }
+
+public enum GameFinishReason
+{
+    Completed,
+    Failed,
+    Aborted
+}
+

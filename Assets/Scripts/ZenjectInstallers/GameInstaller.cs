@@ -13,6 +13,8 @@ public sealed class GameInstaller : MonoInstaller
 
     public override void InstallBindings()
     {
+        Container.Bind<IGameProgressService>().To<GameProgressService>().AsSingle();
+
         var bounds = new CameraBounds(Camera.main, 0.5f);
 
         Container.Bind<CameraBounds>()
@@ -35,6 +37,8 @@ public sealed class GameInstaller : MonoInstaller
             .AsSingle();
 
         Container.Bind<IDangerModel>().To<DangerModel>().AsSingle();
+
+        Container.Bind<IMultiplierModel>().To<MultiplierModel>().AsSingle();
 
         Container.BindInstance(obstacleConfigRegistry);
 

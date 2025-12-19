@@ -17,6 +17,10 @@ public interface IUIWindow
 
 public abstract class UIWindowBase : MonoBehaviour, IUIWindow
 {
+    [Inject] protected IUIManager _uiManager;
+    [Inject] protected IGameFlow _gameFlow;
+    [Inject] protected IGameProgressService _progress;
+
     public virtual void Show()
     {
         gameObject.SetActive(true);

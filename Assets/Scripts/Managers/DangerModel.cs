@@ -1,4 +1,5 @@
 using UnityEngine;
+using Zenject;
 
 public interface IDangerModel
 {
@@ -11,6 +12,8 @@ public interface IDangerModel
 
 public class DangerModel : IDangerModel
 {
+    [Inject] private IGameProgressService _progress;
+
     public float Value { get; private set; }
 
     private float _increaseSpeed;
@@ -34,6 +37,7 @@ public class DangerModel : IDangerModel
         }
 
         Value = Mathf.Clamp01(Value);
+        _progress.CurrentSession.UpdateDanger(Value);
     }
 
     public void Reset()

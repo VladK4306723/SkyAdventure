@@ -6,6 +6,7 @@ public sealed class PlayerController : IGameTick
     private readonly PlayerModel _model;
     private readonly PlayerView _view;
     private readonly IDangerModel _danger;
+    private readonly IMultiplierModel _multiplier;
 
     private float _currentTilt;
     private float _currentX;
@@ -24,11 +25,13 @@ public sealed class PlayerController : IGameTick
         PlayerModel model,
         PlayerView view,
         CameraBounds bounds,
-        IDangerModel danger)
+        IDangerModel danger,
+        IMultiplierModel multiplier)
     {
         _model = model;
         _view = view;
         _danger = danger;
+        _multiplier = multiplier;
 
         _currentX = view.transform.position.x;
         _minX = bounds.Left;
@@ -38,13 +41,26 @@ public sealed class PlayerController : IGameTick
             increaseSpeed: 0.2f,
             decreaseSpeed: 0.1f
         );
+
+        _multiplier.Init(
+        increaseSpeed: 2.2f,
+        decreaseSpeed: 2f,
+        maxMultiplier: 50f
+    );
     }
 
     public void Tick(float dt)
     {
         float input = _view.HorizontalInput;
+        float inputAbs = Mathf.Abs(input);
 
         UpdateDanger(input, dt);
+
+        _multiplier.Update(
+        inputAbs,
+        _danger.Value,
+        dt
+    );
 
         UpdateTilt(input, dt);
         UpdateHorizontalMovement(dt);
@@ -91,6 +107,7 @@ public sealed class PlayerController : IGameTick
         DangerMaxed = null;
 
         _danger.Reset();
+        _multiplier.Reset();
 
         _currentTilt = 0f;
         _currentX = _view.transform.position.x;

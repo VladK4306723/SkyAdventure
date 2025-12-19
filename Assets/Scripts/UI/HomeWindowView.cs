@@ -4,7 +4,6 @@ using Zenject;
 
 public class HomeWindowView : UIWindowBase
 {
-    [Inject] private IGameFlow _gameFlow;
 
     [SerializeField] private Button _startButton;
 
@@ -15,7 +14,7 @@ public class HomeWindowView : UIWindowBase
 
     private void OnStartButtonClicked()
     {
-        _gameFlow.StartGame(PlayerType.Default);
-        HideWindow();
+        _gameFlow.StartGame(PlayerType.Default, 10);
+        _uiManager.Show(UIWindowId.Game);
     }
 }
