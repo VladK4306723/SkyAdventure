@@ -44,6 +44,8 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
 
     public void StartGame(PlayerType playerType)
     {
+        _uiManager.Show(UIWindowId.Game);
+
         _isGameRunning = true;
 
         _spawner = new ObstacleSpawner(

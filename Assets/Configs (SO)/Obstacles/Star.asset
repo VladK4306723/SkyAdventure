@@ -13,6 +13,5 @@ MonoBehaviour:
   m_Name: Star
   m_EditorClassIdentifier: 
   _type: 0
-  Action: 0
   ActionValue: 1
-  Sprite: {fileID: -1822059076440308589, guid: 48fd75bd2adb7784285779be0fd9f38d, type: 3}
+  Sprite: {fileID: 21300000, guid: 599a3ad9494f605438e5ec3b0cabe7ba, type: 3}
