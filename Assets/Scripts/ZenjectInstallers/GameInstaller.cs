@@ -9,6 +9,8 @@ public sealed class GameInstaller : MonoInstaller
     [SerializeField] private ObstacleView obstaclePrefab;
     [SerializeField] private ObstacleConfigRegistry obstacleConfigRegistry;
 
+    [SerializeField] private AudioClip backgroundMusic;
+
     [SerializeField] private PickupEffectView starEffectPrefab;
 
     public override void InstallBindings()
@@ -56,5 +58,11 @@ public sealed class GameInstaller : MonoInstaller
 
         Container.Bind<IDataManager>().To<DataManager>().AsSingle();
 
+        Container.Bind<NotificationService>().AsSingle().NonLazy();
+
+        Container.Bind<MusicService>()
+            .AsSingle()
+            .WithArguments(backgroundMusic)
+            .NonLazy();
     }
 }

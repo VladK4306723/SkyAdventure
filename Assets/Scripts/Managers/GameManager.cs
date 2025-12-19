@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
     [Inject] private PickupEffectView.Pool _starEffectPool;
     [Inject] private IUIManager _uiManager;
     [Inject] private IGameProgressService _progress;
+    [Inject] private NotificationService _notificationService;
 
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private AudioClip _DeathSound;
@@ -56,10 +57,17 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
     {
         if (AttitudeSensor.current != null)
             InputSystem.EnableDevice(AttitudeSensor.current);
+
     }
 
     private void Start()
     {
+        _notificationService.ApplySettings(
+        GameSettings.DailyBonusReminder,
+        19,
+        0
+    );
+
         _uiManager.Show(UIWindowId.Loading);
         _progress.SessionFinished += OnSessionFinished;
     }

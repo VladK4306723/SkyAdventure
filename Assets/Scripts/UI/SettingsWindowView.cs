@@ -1,8 +1,13 @@
 using TMPro;
 using UnityEngine;
+using Zenject;
 
 public sealed class SettingsWindowView : UIWindowBase
 {
+    [Inject] private NotificationService _notificationService;
+    [Inject] private MusicService _musicService;
+
+
     [Header("Toggles")]
     [SerializeField] private ToggleView _musicToggle;
     [SerializeField] private ToggleView _dangerToggle;
@@ -22,7 +27,10 @@ public sealed class SettingsWindowView : UIWindowBase
             {
                 GameSettings.MusicEnabled = v;
                 GameSettings.Save();
+
+                _musicService.ApplySettings();
             });
+
 
         _dangerToggle.Init(
             GameSettings.ShowDangerLevel,
@@ -38,10 +46,13 @@ public sealed class SettingsWindowView : UIWindowBase
             {
                 GameSettings.DailyBonusReminder = v;
                 GameSettings.Save();
+
+                _notificationService.ApplySettings(v, 20, 30);
             });
 
         FillFooter();
     }
+
 
     private void FillFooter()
     {

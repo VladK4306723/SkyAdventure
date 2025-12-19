@@ -6,6 +6,8 @@ using Zenject;
 
 public class HomeWindowView : UIWindowBase
 {
+    [Inject] private MusicService _musicService;
+
     [SerializeField] private Transform _recentFlightsRoot;
     [SerializeField] private RecentFlightItemView _recentFlightItemPrefab;
     [SerializeField] private RectTransform _scrollViewContentRect;
@@ -55,6 +57,8 @@ public class HomeWindowView : UIWindowBase
         base.Show();
 
         _selectedCost = 10;
+
+        _musicService.Play();
 
         if (_dataManager.Meta.Coins == 0)
             _dataManager.Meta.Coins = 10;
