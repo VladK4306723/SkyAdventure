@@ -13,5 +13,7 @@ public class SaveData
     public WeeklyStats Week;
     public Averages Averages;
 
+    public List<AchievementData> Achievements;
+
     public string LastSaveDate;
 }

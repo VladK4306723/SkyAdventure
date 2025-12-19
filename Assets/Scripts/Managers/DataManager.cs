@@ -11,6 +11,7 @@ public interface IDataManager
     PlayerMetaData Meta { get; }
     IReadOnlyList<SessionSummary> RecentSessions { get; }
     IReadOnlyList<DailyFlightStats> WeeklyFlights { get; }
+    IReadOnlyList<AchievementData> Achievements { get; }
 
     DailyStats Today { get; }
     WeeklyStats Week { get; }
@@ -29,6 +30,10 @@ public sealed class DataManager : IDataManager
     public IReadOnlyList<SessionSummary> RecentSessions => _recentSessions;
     public IReadOnlyList<DailyFlightStats> WeeklyFlights => _weeklyFlights;
 
+    private List<AchievementData> _achievements;
+    public IReadOnlyList<AchievementData> Achievements => _achievements;
+
+
     public DailyStats Today { get; private set; }
     public WeeklyStats Week { get; private set; }
     public Averages Averages { get; private set; }
@@ -43,9 +48,14 @@ public sealed class DataManager : IDataManager
     private float _totalMultiplier;
     private int _totalCost;
 
+    private readonly string _instanceTag = $"DataManager#{Guid.NewGuid().ToString("N")[..6]}";
+
+
     public DataManager()
     {
+        Debug.Log($"[DM][CTOR] {_instanceTag} created");
         Load();
+        Debug.Log($"[DM][CTOR] {_instanceTag} loaded achievements={_achievements?.Count ?? -1}");
     }
 
     private string GetSavePath()
@@ -61,6 +71,8 @@ public sealed class DataManager : IDataManager
 
     public void ApplySession(SessionData session, GameFinishReason reason)
     {
+        UpdateAchievements(session, reason);
+
         UpdateMeta(session, reason);
         AddSessionSummary(session, reason);
         UpdateDaily(session, reason);
@@ -70,6 +82,7 @@ public sealed class DataManager : IDataManager
 
         Save();
     }
+
 
     public void Save()
     {
@@ -81,11 +94,22 @@ public sealed class DataManager : IDataManager
             Today = Today,
             Week = Week,
             Averages = Averages,
+            Achievements = _achievements,
             LastSaveDate = Today.Date
         };
 
+
+
         string json = JsonUtility.ToJson(data, true);
         string path = GetSavePath();
+
+        if (_achievements == null || _achievements.Count == 0)
+        {
+            Debug.LogError("[DM][SAVE] Achievements list is EMPTY — recreating defaults");
+            _achievements = CreateDefaultAchievements();
+        }
+
+
 
         File.WriteAllText(path, json);
     }
@@ -113,8 +137,31 @@ public sealed class DataManager : IDataManager
         Week = data.Week ?? new WeeklyStats();
         Averages = data.Averages ?? new Averages();
 
+        if (data.Achievements == null || data.Achievements.Count == 0)
+        {
+            _achievements = CreateDefaultAchievements();
+            Debug.Log("[DM][LOAD] Achievements recreated (empty or null)");
+        }
+        else
+        {
+            _achievements = data.Achievements;
+        }
+
+
         HandleDateRollover(data.LastSaveDate);
+
+        Debug.Log($"[DM][LOAD] {_instanceTag} path={path} exists={File.Exists(path)} achCount={_achievements?.Count ?? -1}");
+        if (_achievements != null)
+        {
+            for (int i = 0; i < _achievements.Count; i++)
+            {
+                var a = _achievements[i];
+                Debug.Log($"[DM][LOAD] {_instanceTag} [{i}] id={a.Id} unlocked={a.IsUnlocked} completed={a.IsCompleted} progress={a.Progress}/{a.Target}");
+            }
+        }
+
     }
+
 
 
     private void CreateNew()
@@ -123,10 +170,15 @@ public sealed class DataManager : IDataManager
         _recentSessions = new List<SessionSummary>();
         _weeklyFlights = new List<DailyFlightStats>();
 
+        _achievements = CreateDefaultAchievements();
+        Debug.Log("[DM][NEW] Default achievements created");
+
+
         Today = CreateToday();
         Week = new WeeklyStats();
         Averages = new Averages();
     }
+
 
     // ───────────────────────── META ─────────────────────────
 
@@ -263,4 +315,101 @@ public sealed class DataManager : IDataManager
             Date = DateTime.UtcNow.ToString("yyyy-MM-dd")
         };
     }
+
+    private void UpdateAchievements(SessionData session, GameFinishReason reason)
+    {
+        Debug.Log("=== UpdateAchievements ===");
+        Debug.Log($"[DM][ACH][BEGIN] {_instanceTag} count={_achievements?.Count ?? -1} reason={reason} stars={session.StarsCollected} time={session.FlightTime}");
+
+        for (int i = 0; i < _achievements.Count; i++)
+        {
+            var a = _achievements[i];
+
+            Debug.Log(
+                $"[ACH] {a.Id} | unlocked={a.IsUnlocked} completed={a.IsCompleted} progress={a.Progress}/{a.Target}"
+            );
+
+            if (!a.IsUnlocked || a.IsCompleted)
+                continue;
+
+            switch (a.Id)
+            {
+                case "first_flight":
+                    if (reason == GameFinishReason.Completed)
+                    {
+                        Debug.Log("[ACH] first_flight completed");
+                        a.Complete();
+                    }
+                    break;
+
+                case "stars_1000":
+                    a.Progress += session.StarsCollected;
+                    Debug.Log($"[ACH] stars_1000 progress += {session.StarsCollected}");
+
+                    if (a.Progress >= a.Target)
+                    {
+                        Debug.Log("[ACH] stars_1000 completed");
+                        a.Complete();
+                    }
+                    break;
+
+                case "flight_60s":
+                    if (session.FlightTime >= a.Target)
+                    {
+                        Debug.Log("[ACH] flight_60s completed");
+                        a.Complete();
+                    }
+                    break;
+            }
+
+            if (a.IsCompleted)
+            {
+                Debug.Log($"[ACH] Unlock next after {a.Id}");
+                UnlockNextAchievement(i);
+                Debug.Log($"[DM][ACH][END] {_instanceTag}");
+                break;
+            }
+        }
+    }
+
+
+    private void UnlockNextAchievement(int index)
+    {
+        int next = index + 1;
+        if (next < _achievements.Count)
+        {
+            var nextAchievement = _achievements[next];
+            if (!nextAchievement.IsUnlocked)
+                nextAchievement.Unlock();
+        }
+    }
+
+    private List<AchievementData> CreateDefaultAchievements()
+    {
+        var list = new List<AchievementData>
+    {
+        new AchievementData
+        {
+            Id = "first_flight",
+            Target = 1,
+            IsUnlocked = true
+        },
+        new AchievementData
+        {
+            Id = "stars_1000",
+            Target = 1000,
+            IsUnlocked = false
+        },
+        new AchievementData
+        {
+            Id = "flight_60s",
+            Target = 60,
+            IsUnlocked = false
+        }
+    };
+
+        return list;
+    }
+
+
 }
