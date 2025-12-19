@@ -1,15 +1,17 @@
-[System.Serializable]
-public sealed class DailyStats
+using System;
+using UnityEngine;
+
+[Serializable]
+public class DailyStats
 {
     public string Date;
-
-    public int TotalStars;     
-    public int StarsCollected;   
-    public int CoinsSpent;
-
     public int Sessions;
     public int SuccessfulSessions;
+    public int StarsCollected;
+    public int CoinsSpent;
 
-    public float SuccessRate =>
-        Sessions == 0 ? 0f : (float)SuccessfulSessions / Sessions;
+    public int SuccessRatePercent =>
+        Sessions == 0
+            ? 0
+            : Mathf.RoundToInt((float)SuccessfulSessions / Sessions * 100f);
 }

@@ -14,6 +14,7 @@ public interface IDataManager
 
     DailyStats Today { get; }
     WeeklyStats Week { get; }
+    Averages Averages { get; }
 
     void ApplySession(SessionData session, GameFinishReason reason);
     void Save();

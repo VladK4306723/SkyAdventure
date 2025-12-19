@@ -10,6 +10,7 @@ public class HomeWindowView : UIWindowBase
     [SerializeField] private RecentFlightItemView _recentFlightItemPrefab;
     [SerializeField] private RectTransform _scrollViewContentRect;
 
+    [SerializeField] private GameObject _separatorPrefab;
 
     [SerializeField] private Button _playButton;
 
@@ -107,16 +108,24 @@ public class HomeWindowView : UIWindowBase
         foreach (Transform child in _recentFlightsRoot)
             Destroy(child.gameObject);
 
-        var sessions = _dataManager.RecentSessions.Take(10);
+        var sessions = _dataManager.RecentSessions.Take(10).ToList();
 
-        foreach (var session in sessions)
+        for (int i = 0; i < sessions.Count; i++)
         {
             var item = Instantiate(
                 _recentFlightItemPrefab,
                 _recentFlightsRoot
             );
 
-            item.Set(session);
+            item.Set(sessions[i]);
+
+            if (i < sessions.Count - 1)
+            {
+                Instantiate(
+                    _separatorPrefab,
+                    _recentFlightsRoot
+                );
+            }
         }
 
         Canvas.ForceUpdateCanvases();
@@ -129,6 +138,7 @@ public class HomeWindowView : UIWindowBase
             _scrollViewContentRect
         );
     }
+
 
 
 }
