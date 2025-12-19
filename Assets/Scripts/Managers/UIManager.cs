@@ -6,12 +6,15 @@ using Zenject;
 public interface IUIManager
 {
     void Show(UIWindowId id);
+    UIWindowId CurrentWindowId { get; }
+    event System.Action<UIWindowId> WindowShown;
 }
 
 public interface IUIWindow
 {
     void Show();
     void HideWindow();
+    
 }
 
 
@@ -20,6 +23,7 @@ public abstract class UIWindowBase : MonoBehaviour, IUIWindow
     [Inject] protected IUIManager _uiManager;
     [Inject] protected IGameFlow _gameFlow;
     [Inject] protected IGameProgressService _progress;
+    [Inject] protected IDataManager _dataManager;
 
     public virtual void Show()
     {
@@ -42,13 +46,29 @@ public sealed class UIManager : MonoBehaviour, IUIManager
         public UIWindowBase Prefab;
     }
 
+    [SerializeField] private Transform _footer;
     [SerializeField] private Transform windowsRoot;
     [SerializeField] private WindowPrefab[] prefabs;
+    
 
     [Inject] private DiContainer _container;
 
     private readonly Dictionary<UIWindowId, UIWindowBase> _instances = new();
     private UIWindowBase _current;
+
+    private readonly HashSet<UIWindowId> WindowsWithoutFooter = new()
+    {
+        UIWindowId.Loading,
+        UIWindowId.Pause,
+        UIWindowId.Victory,
+        UIWindowId.GameOver,
+        UIWindowId.Record
+    };
+
+
+    public UIWindowId CurrentWindowId { get; private set; }
+
+    public event System.Action<UIWindowId> WindowShown;
 
     public void Show(UIWindowId id)
     {
@@ -62,8 +82,25 @@ public sealed class UIManager : MonoBehaviour, IUIManager
         }
 
         _current = window;
+        CurrentWindowId = id;
+
         _current.Show();
+        WindowShown?.Invoke(id);
+
+        UpdateFooterVisibility(id);
     }
+
+    private void UpdateFooterVisibility(UIWindowId id)
+    {
+        bool showFooter = !WindowsWithoutFooter.Contains(id);
+
+        if (_footer.gameObject.activeSelf != showFooter)
+            _footer.gameObject.SetActive(showFooter);
+
+        if (showFooter)
+            _footer.SetAsLastSibling();
+    }
+
 
     private UIWindowBase CreateWindow(UIWindowId id)
     {
@@ -72,9 +109,7 @@ public sealed class UIManager : MonoBehaviour, IUIManager
             if (p.Id == id)
             {
                 var instance = Instantiate(p.Prefab, windowsRoot);
-
                 _container.Inject(instance);
-
                 instance.HideWindow();
                 return instance;
             }
@@ -84,3 +119,4 @@ public sealed class UIManager : MonoBehaviour, IUIManager
         return null;
     }
 }
+

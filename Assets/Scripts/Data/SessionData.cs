@@ -3,6 +3,7 @@ public class SessionData
     public int FlightCost { get; private set; }
     public int StarsCollected { get; private set; }
     public float FlightTime { get; private set; }
+    public float Distance { get; private set; }
     public float MaxMultiplier { get; private set; }
     public float Multiplier { get; private set; }
     public float Danger { get; private set; }
@@ -13,6 +14,7 @@ public class SessionData
     {
         StarsCollected = 0;
         FlightTime = 0f;
+        Distance = 0f;
         MaxMultiplier = 1f;
         Multiplier = 1f;
         Danger = 0f;
@@ -32,6 +34,11 @@ public class SessionData
     public void UpdateTime(float dt)
     {
         FlightTime += dt;
+    }
+
+    public void UpdateDistance(float delta)
+    {
+        Distance += delta;
     }
 
     public void UpdateDanger(float danger)

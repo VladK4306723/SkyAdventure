@@ -109,6 +109,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
         float dt = Time.deltaTime;
 
         _progress.CurrentSession.UpdateTime(dt);
+        _progress.CurrentSession.UpdateDistance(gameSpeed * dt);
 
         _spawner.Tick(dt);
 

@@ -164,7 +164,7 @@ public sealed class DataManager : IDataManager
         _recentSessions.Insert(0, new SessionSummary
         {
             DateTime = DateTime.UtcNow.ToString("o"),
-            //Distance = s.Distance,
+            Distance = s.Distance,
             Stars = s.StarsCollected,
             Multiplier = s.MaxMultiplier,
             Success = reason == GameFinishReason.Completed

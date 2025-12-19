@@ -29,6 +29,9 @@ public enum UIWindowId
     GameOver,
     Victory,
     Record,
+    Stats,
+    Collection,
+    Settings
 }
 
 public enum GameFinishReason
