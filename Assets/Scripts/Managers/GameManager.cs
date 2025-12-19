@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Zenject;
 
 public interface IGameFlow
@@ -25,8 +27,18 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
     [Inject] private IUIManager _uiManager;
     [Inject] private IGameProgressService _progress;
 
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _DeathSound;
+    [SerializeField] private AudioClip _starSound;
+
+    [SerializeField] private GameObject _dangerExplosionPrefab;
+    [SerializeField] private float _dangerExplosionDuration = 2f;
+
+
     [SerializeField] private PickupEffectView starEffectPrefab;
     [SerializeField] private float gameSpeed = 3f;
+
+    
 
     private PlayerType _currentPlayerType;
     private int _currentFlightCost;
@@ -40,9 +52,16 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
 
     private readonly List<IGameTick> _ticks = new();
 
+    private void Awake()
+    {
+        if (AttitudeSensor.current != null)
+            InputSystem.EnableDevice(AttitudeSensor.current);
+    }
+
     private void Start()
     {
         _uiManager.Show(UIWindowId.Loading);
+        _progress.SessionFinished += OnSessionFinished;
     }
 
     private void RegisterObstacle(ObstacleView obstacle)
@@ -135,6 +154,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
         if (obstacle.Type == ObstacleType.Star)
         {
             HandleStar(obstacle);
+            _audioSource.PlayOneShot(_starSound);
         }
     }
 
@@ -164,15 +184,68 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
         if (!_isGameRunning)
             return;
 
-        _progress.EndSession(GameFinishReason.Failed);
-
         _isGameOver = true;
         _isGameRunning = false;
 
-        CleanupGame();
+        _progress.EndSession(GameFinishReason.Failed);
 
-        _uiManager.Show(UIWindowId.GameOver);
+        Vector3 explosionPos = Vector3.zero;
+
+        if (_player != null)
+        {
+            explosionPos = _player.GetExplosionPosition();
+            _player.HideVisualInstant();
+        }
+
+        _audioSource.PlayOneShot(_DeathSound);
+
+        StartCoroutine(PlayDangerExplosionAndGameOver(explosionPos));
     }
+
+
+
+    private IEnumerator PlayDangerExplosionAndGameOver(Vector3 position)
+    {
+        if (_dangerExplosionPrefab != null)
+        {
+            var explosion = Instantiate(
+                _dangerExplosionPrefab,
+                position,
+                Quaternion.identity
+            );
+
+            float t = 0f;
+            Vector3 startScale = Vector3.zero;
+            Vector3 endScale = Vector3.one * 1.2f;
+
+            explosion.transform.localScale = startScale;
+
+            var canvasGroup = explosion.GetComponent<CanvasGroup>();
+            if (canvasGroup != null)
+                canvasGroup.alpha = 0f;
+
+            while (t < _dangerExplosionDuration)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / _dangerExplosionDuration);
+
+                explosion.transform.localScale =
+                    Vector3.Lerp(startScale, endScale, k * k);
+
+                if (canvasGroup != null)
+                    canvasGroup.alpha = k;
+
+                yield return null;
+            }
+
+            Destroy(explosion);
+        }
+
+        CleanupGame();
+        //_uiManager.Show(UIWindowId.GameOver);
+    }
+
+
 
     public void AbortGame()
     {
@@ -183,7 +256,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
 
         CleanupGame();
 
-        _uiManager.Show(UIWindowId.Home);
+        //_uiManager.Show(UIWindowId.Home);
     }
 
     public void FinishGame()
@@ -231,13 +304,41 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
         _spawner = null;
     }
 
+    private void OnSessionFinished(SessionData session, GameFinishReason reason, SessionResult result)
+    {
+
+        if (result.HasNewAchievement || result.HasNewFlightRecord)
+        {
+            _uiManager.Show(UIWindowId.Record);
+            return;
+        }
+
+        switch (reason)
+        {
+            case GameFinishReason.Completed:
+                _uiManager.Show(UIWindowId.Victory);
+                break;
+
+            case GameFinishReason.Aborted:
+                _uiManager.Show(UIWindowId.Home);
+                break;
+
+            default:
+                _uiManager.Show(UIWindowId.GameOver);
+                break;
+        }
+    }
+
+
 
     private void OnDestroy()
     {
-        //_spawner.Spawned -= RegisterObstacle;
+        if (_progress != null)
+            _progress.SessionFinished -= OnSessionFinished;
 
         if (_player != null)
             _player.View.HitObstacle -= OnPlayerHitObstacle;
     }
+
 
 }

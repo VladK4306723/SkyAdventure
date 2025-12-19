@@ -1,8 +1,10 @@
 using System;
 using UnityEngine;
 
+
 public sealed class PlayerController : IGameTick
 {
+
     private readonly PlayerModel _model;
     private readonly PlayerView _view;
     private readonly IDangerModel _danger;
@@ -99,6 +101,17 @@ public sealed class PlayerController : IGameTick
         float horizontalSpeed = BaseHorizontalSpeed * _model.SpeedMultiplier;
 
         _currentX += tilt01 * horizontalSpeed * dt;
+    }
+
+    public void HideVisualInstant()
+    {
+        if (View.transform != null)
+            View.gameObject.SetActive(false);
+    }
+
+    public Vector3 GetExplosionPosition()
+    {
+        return View.transform.position;
     }
 
     public void Cleanup()

@@ -17,7 +17,7 @@ public interface IDataManager
     WeeklyStats Week { get; }
     Averages Averages { get; }
 
-    void ApplySession(SessionData session, GameFinishReason reason);
+    SessionResult ApplySession(SessionData session, GameFinishReason reason);
     void Save();
 }
 
@@ -48,14 +48,10 @@ public sealed class DataManager : IDataManager
     private float _totalMultiplier;
     private int _totalCost;
 
-    private readonly string _instanceTag = $"DataManager#{Guid.NewGuid().ToString("N")[..6]}";
-
 
     public DataManager()
     {
-        Debug.Log($"[DM][CTOR] {_instanceTag} created");
         Load();
-        Debug.Log($"[DM][CTOR] {_instanceTag} loaded achievements={_achievements?.Count ?? -1}");
     }
 
     private string GetSavePath()
@@ -69,11 +65,26 @@ public sealed class DataManager : IDataManager
 
     // ───────────────────────── PUBLIC API ─────────────────────────
 
-    public void ApplySession(SessionData session, GameFinishReason reason)
+    public SessionResult ApplySession(SessionData session, GameFinishReason reason)
     {
-        UpdateAchievements(session, reason);
+        int completedBefore = 0;
+        for (int i = 0; i < _achievements.Count; i++)
+            if (_achievements[i].IsCompleted)
+                completedBefore++;
 
+        float prevLongestFlight = Meta.LongestFlight;
+
+        UpdateAchievements(session, reason);
         UpdateMeta(session, reason);
+
+        int completedAfter = 0;
+        for (int i = 0; i < _achievements.Count; i++)
+            if (_achievements[i].IsCompleted)
+                completedAfter++;
+
+        bool hasNewAchievement = completedAfter > completedBefore;
+        bool hasNewFlightRecord = session.FlightTime > prevLongestFlight;
+
         AddSessionSummary(session, reason);
         UpdateDaily(session, reason);
         UpdateWeekly(session, reason);
@@ -81,6 +92,8 @@ public sealed class DataManager : IDataManager
         UpdateAverages(session);
 
         Save();
+
+        return new SessionResult(hasNewAchievement, hasNewFlightRecord);
     }
 
 
@@ -105,7 +118,6 @@ public sealed class DataManager : IDataManager
 
         if (_achievements == null || _achievements.Count == 0)
         {
-            Debug.LogError("[DM][SAVE] Achievements list is EMPTY — recreating defaults");
             _achievements = CreateDefaultAchievements();
         }
 
@@ -140,7 +152,6 @@ public sealed class DataManager : IDataManager
         if (data.Achievements == null || data.Achievements.Count == 0)
         {
             _achievements = CreateDefaultAchievements();
-            Debug.Log("[DM][LOAD] Achievements recreated (empty or null)");
         }
         else
         {
@@ -150,13 +161,11 @@ public sealed class DataManager : IDataManager
 
         HandleDateRollover(data.LastSaveDate);
 
-        Debug.Log($"[DM][LOAD] {_instanceTag} path={path} exists={File.Exists(path)} achCount={_achievements?.Count ?? -1}");
         if (_achievements != null)
         {
             for (int i = 0; i < _achievements.Count; i++)
             {
                 var a = _achievements[i];
-                Debug.Log($"[DM][LOAD] {_instanceTag} [{i}] id={a.Id} unlocked={a.IsUnlocked} completed={a.IsCompleted} progress={a.Progress}/{a.Target}");
             }
         }
 
@@ -171,8 +180,6 @@ public sealed class DataManager : IDataManager
         _weeklyFlights = new List<DailyFlightStats>();
 
         _achievements = CreateDefaultAchievements();
-        Debug.Log("[DM][NEW] Default achievements created");
-
 
         Today = CreateToday();
         Week = new WeeklyStats();
@@ -185,6 +192,13 @@ public sealed class DataManager : IDataManager
     private void UpdateMeta(SessionData s, GameFinishReason reason)
     {
         Meta.TotalStars += s.StarsCollected;
+
+        if (reason == GameFinishReason.Completed)
+        {
+            int earnedCoins = Mathf.RoundToInt(s.StarsCollected * s.MaxMultiplier);
+            Meta.Coins += earnedCoins;
+        }
+
         Meta.Coins -= s.FlightCost;
 
         if (s.FlightTime > Meta.LongestFlight)
@@ -209,6 +223,7 @@ public sealed class DataManager : IDataManager
             Meta.CurrentWinStreak = 0;
         }
     }
+
 
     // ───────────────────────── SESSION HISTORY ─────────────────────────
 
@@ -319,7 +334,6 @@ public sealed class DataManager : IDataManager
     private void UpdateAchievements(SessionData session, GameFinishReason reason)
     {
         Debug.Log("=== UpdateAchievements ===");
-        Debug.Log($"[DM][ACH][BEGIN] {_instanceTag} count={_achievements?.Count ?? -1} reason={reason} stars={session.StarsCollected} time={session.FlightTime}");
 
         for (int i = 0; i < _achievements.Count; i++)
         {
@@ -332,6 +346,8 @@ public sealed class DataManager : IDataManager
             if (!a.IsUnlocked || a.IsCompleted)
                 continue;
 
+            bool completedNow = false;
+
             switch (a.Id)
             {
                 case "first_flight":
@@ -339,6 +355,7 @@ public sealed class DataManager : IDataManager
                     {
                         Debug.Log("[ACH] first_flight completed");
                         a.Complete();
+                        completedNow = true;
                     }
                     break;
 
@@ -350,6 +367,7 @@ public sealed class DataManager : IDataManager
                     {
                         Debug.Log("[ACH] stars_1000 completed");
                         a.Complete();
+                        completedNow = true;
                     }
                     break;
 
@@ -358,31 +376,38 @@ public sealed class DataManager : IDataManager
                     {
                         Debug.Log("[ACH] flight_60s completed");
                         a.Complete();
+                        completedNow = true;
                     }
                     break;
             }
 
-            if (a.IsCompleted)
+            _achievements[i] = a;
+
+            if (completedNow || a.IsCompleted)
             {
                 Debug.Log($"[ACH] Unlock next after {a.Id}");
                 UnlockNextAchievement(i);
-                Debug.Log($"[DM][ACH][END] {_instanceTag}");
                 break;
             }
         }
     }
 
 
+
     private void UnlockNextAchievement(int index)
     {
         int next = index + 1;
-        if (next < _achievements.Count)
-        {
-            var nextAchievement = _achievements[next];
-            if (!nextAchievement.IsUnlocked)
-                nextAchievement.Unlock();
-        }
+        if (next >= _achievements.Count)
+            return;
+
+        var nextAchievement = _achievements[next];
+
+        if (!nextAchievement.IsUnlocked)
+            nextAchievement.Unlock();
+
+        _achievements[next] = nextAchievement;
     }
+
 
     private List<AchievementData> CreateDefaultAchievements()
     {
@@ -413,3 +438,16 @@ public sealed class DataManager : IDataManager
 
 
 }
+
+public readonly struct SessionResult
+{
+    public readonly bool HasNewAchievement;
+    public readonly bool HasNewFlightRecord;
+
+    public SessionResult(bool achievement, bool record)
+    {
+        HasNewAchievement = achievement;
+        HasNewFlightRecord = record;
+    }
+}
+

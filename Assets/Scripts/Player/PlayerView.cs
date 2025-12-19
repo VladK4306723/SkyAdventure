@@ -4,10 +4,13 @@ using UnityEngine.InputSystem;
 
 public sealed class PlayerView : MonoBehaviour
 {
+    [SerializeField] private float _tiltSensitivity = 2f;
+    [SerializeField] private float _deadZone = 0.05f;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     private PlayerInputActions _input;
     private float _horizontal;
+    public Transform Transform => transform;
 
     public event Action<ObstacleView> HitObstacle;
 
@@ -31,6 +34,28 @@ public sealed class PlayerView : MonoBehaviour
         _input.Player.Move.performed -= OnMove;
         _input.Player.Move.canceled -= OnMove;
         _input.Player.Disable();
+    }
+
+    private void Update()
+    {
+#if UNITY_ANDROID || UNITY_IOS
+        if (AttitudeSensor.current == null)
+            return;
+
+        Quaternion q = AttitudeSensor.current.attitude.ReadValue();
+
+        float tilt =
+#if UNITY_IOS
+            q.x;
+#else
+            q.y;
+#endif
+
+        if (Mathf.Abs(tilt) < _deadZone)
+            tilt = 0f;
+
+        _horizontal = Mathf.Clamp(tilt * _tiltSensitivity, -1f, 1f);
+#endif
     }
 
     private void OnMove(InputAction.CallbackContext ctx)
