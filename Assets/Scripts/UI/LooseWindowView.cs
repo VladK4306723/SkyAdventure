@@ -19,6 +19,14 @@ public class LooseWindowView : UIWindowBase
     {
         base.Show();
         UpdateLooseStats();
+
+        int cost = _progress.CurrentSession.FlightCost;
+
+        if (_dataManager.Meta.Coins < cost)
+        {
+            _tryAgainBTN.interactable = false;
+            return;
+        }
     }
 
     private void UpdateLooseStats()
@@ -32,6 +40,7 @@ public class LooseWindowView : UIWindowBase
         _gameFlow.RestartGame();
         _uiManager.Show(UIWindowId.Game);
     }
+
 
     private void OnHomeClicked()
     {

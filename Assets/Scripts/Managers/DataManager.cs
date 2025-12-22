@@ -22,7 +22,7 @@ public interface IDataManager
 
 public sealed class DataManager : IDataManager
 {
-    private const string SaveKey = "GAME_SAVE_V1";
+    private const int c_StartCoins = 10;
 
     public PlayerMetaData Meta { get; private set; }
     public IReadOnlyList<SessionSummary> RecentSessions => _recentSessions;
@@ -174,15 +174,20 @@ public sealed class DataManager : IDataManager
     private void CreateNew()
     {
         Meta = new PlayerMetaData();
+        Meta.Coins = c_StartCoins;
+        Meta.TotalStars = 0;
+
         _recentSessions = new List<SessionSummary>();
         _weeklyFlights = new List<DailyFlightStats>();
-
         _achievements = CreateDefaultAchievements();
 
         Today = CreateToday();
         Week = new WeeklyStats();
         Averages = new Averages();
+
+        Save();
     }
+
 
 
     // ───────────────────────── META ─────────────────────────

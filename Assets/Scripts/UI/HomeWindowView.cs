@@ -58,10 +58,9 @@ public class HomeWindowView : UIWindowBase
 
         _selectedCost = 10;
 
-        _musicService.Play();
+        SetCost(_selectedCost);
 
-        if (_dataManager.Meta.Coins == 0)
-            _dataManager.Meta.Coins = 10;
+        _musicService.Play();
 
         _totalStarsText.text = _dataManager.Meta.TotalStars.ToString();
         _totalCoinsText.text = _dataManager.Meta.Coins.ToString();

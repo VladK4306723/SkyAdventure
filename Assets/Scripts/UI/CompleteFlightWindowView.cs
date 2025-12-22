@@ -22,6 +22,13 @@ public class CompleteFlightWindowView : UIWindowBase
     {
         base.Show();
         UpdateFlightStats();
+
+        int cost = _progress.CurrentSession.FlightCost;
+
+        if (_dataManager.Meta.Coins < cost)
+        {
+            _tryAgainBTN.interactable = false;
+        }
     }
 
     private void UpdateFlightStats()
@@ -38,6 +45,7 @@ public class CompleteFlightWindowView : UIWindowBase
         _gameFlow.RestartGame();
         _uiManager.Show(UIWindowId.Game);
     }
+
 
     private void OnHomeClicked()
     {

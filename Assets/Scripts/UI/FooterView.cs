@@ -1,11 +1,14 @@
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
-using System.Collections.Generic;
 
 public class FooterView : UIWindowBase
 {
+    [Inject] private IGameStateService _gameStateService;
+
     [SerializeField] private Button _homeButton;
     [SerializeField] private Button _statsButton;
     [SerializeField] private Button _collectionButton;
@@ -38,26 +41,23 @@ public class FooterView : UIWindowBase
             ui.WindowShown += OnWindowShown;
             SetActiveWindow(ui.CurrentWindowId);
         }
+
+        _gameStateService.StateChanged += OnGameStateChanged;
+        ApplyGameState(_gameStateService.State);
     }
 
     private void OnDisable()
     {
         if (_uiManager is IUIManager ui)
             ui.WindowShown -= OnWindowShown;
+
+        _gameStateService.StateChanged -= OnGameStateChanged;
     }
+
 
     private void OnWindowShown(UIWindowId id)
     {
         SetActiveWindow(id);
-    }
-
-    private void SetActiveWindow(UIWindowId id)
-    {
-        foreach (var pair in _buttonsByWindow)
-        {
-            bool isActive = pair.Key == id;
-            SetButtonAlpha(pair.Value, isActive ? 1f : inactiveAlpha);
-        }
     }
 
     private void SetButtonAlpha(Button button, float alpha)
@@ -71,4 +71,43 @@ public class FooterView : UIWindowBase
             graphic.color = color;
         }
     }
+
+    private void OnGameStateChanged(GameState state)
+    {
+        ApplyGameState(state);
+    }
+
+
+    private void ApplyGameState(GameState state)
+    {
+        bool blocked = state == GameState.Playing;
+
+        foreach (var pair in _buttonsByWindow)
+        {
+            pair.Value.interactable = !blocked;
+        }
+
+        RefreshVisualState();
+    }
+
+    private void RefreshVisualState()
+    {
+        var current =
+            (_uiManager as IUIManager)?.CurrentWindowId ?? UIWindowId.Home;
+
+        if (current == UIWindowId.Game)
+            current = UIWindowId.Home;
+
+        foreach (var pair in _buttonsByWindow)
+        {
+            bool isActive = pair.Key == current;
+            SetButtonAlpha(pair.Value, isActive ? 1f : inactiveAlpha);
+        }
+    }
+
+
+    private void SetActiveWindow(UIWindowId id)
+        {
+            RefreshVisualState();
+        }
 }

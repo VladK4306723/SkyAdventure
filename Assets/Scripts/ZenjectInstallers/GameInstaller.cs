@@ -64,5 +64,7 @@ public sealed class GameInstaller : MonoInstaller
             .AsSingle()
             .WithArguments(backgroundMusic)
             .NonLazy();
+
+        Container.Bind<IGameStateService>().To<GameStateService>().AsSingle();
     }
 }

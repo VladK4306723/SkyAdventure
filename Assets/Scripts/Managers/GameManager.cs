@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
     [Inject] private IUIManager _uiManager;
     [Inject] private IGameProgressService _progress;
     [Inject] private NotificationService _notificationService;
+    [Inject] private IGameStateService _gameStateService;
 
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private AudioClip _DeathSound;
@@ -87,6 +88,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
         _progress.CurrentSession.SetFlightCost(cost);
 
         _isGameRunning = true;
+        _gameStateService.SetState(GameState.Playing);
 
         _spawner = new ObstacleSpawner(
         _obstacleFactory,
@@ -110,11 +112,15 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
     public void PauseGame()
     {
         _isGameRunning = false;
+        _gameStateService.SetState(GameState.Paused);
+        SetGameplayVisuals(false);
     }
 
     public void ResumeGame()
     {
         _isGameRunning = true;
+        _gameStateService.SetState(GameState.Playing);
+        SetGameplayVisuals(true);
     }
 
     public void RestartGame()
@@ -122,6 +128,18 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
         CleanupGame();
 
         StartGame(_currentPlayerType, _currentFlightCost);
+    }
+
+    private void SetGameplayVisuals(bool visible)
+    {
+        if (_player != null)
+            _player.View.gameObject.SetActive(visible);
+
+        for (int i = 0; i < _ticks.Count; i++)
+        {
+            if (_ticks[i] is ObstacleView obstacle)
+                obstacle.gameObject.SetActive(visible);
+        }
     }
 
 

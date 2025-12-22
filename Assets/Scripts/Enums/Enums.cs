@@ -41,3 +41,10 @@ public enum GameFinishReason
     Aborted
 }
 
+public enum GameState
+{
+    Playing,
+    Paused
+}
+
+
