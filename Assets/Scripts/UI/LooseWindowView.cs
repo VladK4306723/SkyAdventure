@@ -32,7 +32,7 @@ public class LooseWindowView : UIWindowBase
     private void UpdateLooseStats()
     {
         _currentMultiplier.text = _progress.CurrentSession.Multiplier.ToString("0.0");
-        _coinsLost.text = _progress.CurrentSession.FlightCost.ToString();
+        _coinsLost.text = $"{_progress.CurrentSession.FlightCost} credits";
     }
 
     private void OnTryAgainClicked()
@@ -44,6 +44,7 @@ public class LooseWindowView : UIWindowBase
 
     private void OnHomeClicked()
     {
+        _gameFlow.AbortGame();
         _uiManager.Show(UIWindowId.Home);
     }
 }

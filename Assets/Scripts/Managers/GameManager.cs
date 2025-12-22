@@ -214,6 +214,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
         _isGameRunning = false;
 
         _progress.EndSession(GameFinishReason.Failed);
+        _gameStateService.SetState(GameState.Paused);
 
         Vector3 explosionPos = Vector3.zero;
 
@@ -277,6 +278,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
     {
         _isGameRunning = false;
         _isGameOver = true;
+        _gameStateService.SetState(GameState.Paused);
 
         _progress.EndSession(GameFinishReason.Aborted);
 
@@ -292,6 +294,7 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
 
         _isGameOver = true;
         _isGameRunning = false;
+        _gameStateService.SetState(GameState.Paused);
 
         _progress.EndSession(GameFinishReason.Completed);
 

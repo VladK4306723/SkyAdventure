@@ -1596,6 +1596,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 792c236045215174a8e54116a6decedd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _initialCloudCount: 4
   _container: {fileID: 1782762900}
   _cloudPrefab: {fileID: 7447003805830516128, guid: f601378afe656ad49815ddfd9fb72685, type: 3}
   _spawnInterval: 2
@@ -1957,7 +1958,7 @@ Canvas:
   m_GameObject: {fileID: 1935665209}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 519420031}
   m_PlaneDistance: 1
   m_PixelPerfect: 1
@@ -2245,7 +2246,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8666667, g: 0.8784314, b: 0.93333334, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

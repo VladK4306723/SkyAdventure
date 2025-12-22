@@ -6,17 +6,13 @@ using Unity.Notifications.Android;
 using UnityEngine.Android;
 #endif
 
-#if UNITY_IOS
-using Unity.Notifications.iOS;
-#endif
-
 public sealed class NotificationService
 {
+#if UNITY_ANDROID
     private const string AndroidChannelId = "daily_reminder";
-    private const string AndroidChannelName = "Daily Reminders";
-    private const string AndroidChannelDesc = "Daily game reminders";
-
-    private const string IOSNotificationId = "daily_reminder";
+    private const string AndroidPostNotificationsPermission =
+        "android.permission.POST_NOTIFICATIONS";
+#endif
 
     public void Initialize()
     {
@@ -25,20 +21,31 @@ public sealed class NotificationService
 #endif
     }
 
+    public void RequestPermissionFromUser()
+    {
+#if UNITY_ANDROID
+        if (AndroidSdkInt < 33)
+            return;
+
+        if (Permission.HasUserAuthorizedPermission(AndroidPostNotificationsPermission))
+            return;
+
+        Permission.RequestUserPermission(AndroidPostNotificationsPermission);
+#endif
+    }
+
     public void ApplySettings(bool enabled, int hour, int minute)
     {
+#if UNITY_ANDROID
         CancelAll();
 
         if (!enabled)
             return;
 
-#if UNITY_ANDROID
-        RequestAndroidPermission();
-        ScheduleAndroid(hour, minute);
-#endif
+        if (!HasAndroidNotificationPermission())
+            return;
 
-#if UNITY_IOS
-        ScheduleIOS(hour, minute);
+        ScheduleAndroid(hour, minute);
 #endif
     }
 
@@ -46,10 +53,7 @@ public sealed class NotificationService
     {
 #if UNITY_ANDROID
         AndroidNotificationCenter.CancelAllScheduledNotifications();
-#endif
-
-#if UNITY_IOS
-        iOSNotificationCenter.RemoveAllScheduledNotifications();
+        AndroidNotificationCenter.CancelAllDisplayedNotifications();
 #endif
     }
 
@@ -59,20 +63,20 @@ public sealed class NotificationService
         var channel = new AndroidNotificationChannel
         {
             Id = AndroidChannelId,
-            Name = AndroidChannelName,
-            Importance = Importance.Default,
-            Description = AndroidChannelDesc
+            Name = "Daily Reminders",
+            Importance = Importance.High,
+            Description = "Daily game reminders"
         };
 
         AndroidNotificationCenter.RegisterNotificationChannel(channel);
     }
 
-    private void RequestAndroidPermission()
+    private bool HasAndroidNotificationPermission()
     {
-        if (Permission.HasUserAuthorizedPermission("android.permission.POST_NOTIFICATIONS"))
-            return;
+        if (AndroidSdkInt < 33)
+            return true;
 
-        Permission.RequestUserPermission("android.permission.POST_NOTIFICATIONS");
+        return Permission.HasUserAuthorizedPermission(AndroidPostNotificationsPermission);
     }
 
     private void ScheduleAndroid(int hour, int minute)
@@ -80,47 +84,32 @@ public sealed class NotificationService
         var notification = new AndroidNotification
         {
             Title = "Sky Adventure",
-            Text = "Забери щоденний бонус ✈️",
+            Text = "Wanna fly? ✈️",
             FireTime = GetNextTime(hour, minute),
             RepeatInterval = TimeSpan.FromDays(1)
         };
 
-        AndroidNotificationCenter.SendNotification(
-            notification,
-            AndroidChannelId
-        );
+        AndroidNotificationCenter.SendNotification(notification, AndroidChannelId);
     }
 #endif
 
-#if UNITY_IOS
-    private void ScheduleIOS(int hour, int minute)
+#if UNITY_ANDROID && !UNITY_EDITOR
+    private static int AndroidSdkInt
     {
-        var trigger = new iOSNotificationCalendarTrigger
+        get
         {
-            Hour = hour,
-            Minute = minute,
-            Repeats = true
-        };
-
-        var notification = new iOSNotification
-        {
-            Identifier = IOSNotificationId,
-            Title = "Sky Adventure",
-            Body = "Забери щоденний бонус ✈️",
-            ShowInForeground = true,
-            ForegroundPresentationOption =
-                PresentationOption.Alert |
-                PresentationOption.Sound,
-            Trigger = trigger
-        };
-
-        iOSNotificationCenter.ScheduleNotification(notification);
+            using var version = new AndroidJavaClass("android.os.Build$VERSION");
+            return version.GetStatic<int>("SDK_INT");
+        }
     }
+#else
+    private static int AndroidSdkInt => 0;
 #endif
 
     private DateTime GetNextTime(int hour, int minute)
     {
         var now = DateTime.Now;
+
         var target = new DateTime(
             now.Year,
             now.Month,

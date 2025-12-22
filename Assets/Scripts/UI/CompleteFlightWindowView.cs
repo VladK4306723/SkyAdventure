@@ -49,6 +49,7 @@ public class CompleteFlightWindowView : UIWindowBase
 
     private void OnHomeClicked()
     {
-       _uiManager.Show(UIWindowId.Home);
+        _gameFlow.FinishGame();
+        _uiManager.Show(UIWindowId.Home);
     }
 }

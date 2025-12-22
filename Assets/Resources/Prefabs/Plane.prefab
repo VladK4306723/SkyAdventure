@@ -102,7 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d35a92433784b124a9ea3737f7259dad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tiltSensitivity: 2
+  _tiltSensitivity: 8
   _deadZone: 0.05
   spriteRenderer: {fileID: 1549437878124607342}
 --- !u!70 &1522324470572013365
