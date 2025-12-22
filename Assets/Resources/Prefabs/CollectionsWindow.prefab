@@ -342,8 +342,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ccf7258de91211b4780a329ad73ef99d, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: d150413a79936b14296d770d8d8991ad, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -351,7 +351,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 3
 --- !u!1 &366622509340069928
 GameObject:
   m_ObjectHideFlags: 0
@@ -607,8 +607,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ccf7258de91211b4780a329ad73ef99d, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: d150413a79936b14296d770d8d8991ad, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -616,7 +616,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 3
 --- !u!114 &571115754631272102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -706,8 +706,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ccf7258de91211b4780a329ad73ef99d, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: d150413a79936b14296d770d8d8991ad, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -715,7 +715,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 3
 --- !u!114 &4681230162588679524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -800,8 +800,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 8a44e09b4c2836747a2b05ba6bc3ce5e, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 8adbbab778e74694ea59ac3bd5da6901, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
@@ -809,7 +809,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2
 --- !u!114 &4855942205211396992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -919,9 +919,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Achievments
-
-'
+  m_text: Achievements
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 34deda130d44df749b7fcab88576d502, type: 2}
   m_sharedMaterial: {fileID: 7847818093240328255, guid: 34deda130d44df749b7fcab88576d502, type: 2}
@@ -986,7 +984,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 5, y: 0, z: 0, w: 0}
+  m_margin: {x: 5, y: 0, z: -35.534454, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1659,8 +1657,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ccf7258de91211b4780a329ad73ef99d, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: d150413a79936b14296d770d8d8991ad, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1668,7 +1666,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 3
 --- !u!114 &7370831363001667031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1751,7 +1749,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ACHIVMENTS
+  m_text: Achievements
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 34deda130d44df749b7fcab88576d502, type: 2}
   m_sharedMaterial: {fileID: 7847818093240328255, guid: 34deda130d44df749b7fcab88576d502, type: 2}
@@ -4850,8 +4848,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 8a44e09b4c2836747a2b05ba6bc3ce5e, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 8adbbab778e74694ea59ac3bd5da6901, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
@@ -4859,7 +4857,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2
 --- !u!114 &6243802049211988020
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1011,6 +1011,7 @@ GameObject:
   - component: {fileID: 7214077195173381797}
   - component: {fileID: 6666802246897839108}
   - component: {fileID: 348268751520251747}
+  - component: {fileID: 464447749507557185}
   m_Layer: 5
   m_Name: RecentFlightItem
   m_TagString: Untagged
@@ -1093,6 +1094,26 @@ MonoBehaviour:
   _distanceText: {fileID: 1033751482089237856}
   _starsText: {fileID: 2466642138927320677}
   _multiplierText: {fileID: 6629190477535030379}
+--- !u!114 &464447749507557185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7685290231165713691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 0
+  m_PreferredWidth: -1
+  m_PreferredHeight: 55
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &8737428676574147827
 GameObject:
   m_ObjectHideFlags: 0
