@@ -1597,31 +1597,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _container: {fileID: 1782762900}
-  _cloudPrefab: {fileID: 4866743917147506428, guid: f601378afe656ad49815ddfd9fb72685, type: 3}
+  _cloudPrefab: {fileID: 7447003805830516128, guid: f601378afe656ad49815ddfd9fb72685, type: 3}
   _spawnInterval: 2
-  _xRange: {x: -100, y: 100}
-  _scaleRange: {x: 0.4, y: 1}
-  _speedRange: {x: 20, y: 60}
-  _destroyOffset: 150
---- !u!224 &1782762900
-RectTransform:
+  _scaleRange: {x: 0.1, y: 0.5}
+  _speedRange: {x: 0.5, y: 2}
+  _destroyOffset: 2
+--- !u!4 &1782762900
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1782762898}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 838.8963}
-  m_LocalScale: {x: 5, y: 5, z: 5}
-  m_ConstrainProportionsScale: 1
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1935665213}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.034240723, y: 0.015625}
-  m_SizeDelta: {x: -386.95, y: -838.89}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1803351335
 GameObject:
   m_ObjectHideFlags: 0
@@ -1988,7 +1983,6 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1782762900}
   - {fileID: 2140371931}
   - {fileID: 7958588}
   m_Father: {fileID: 0}
@@ -2302,3 +2296,4 @@ SceneRoots:
   - {fileID: 1803351337}
   - {fileID: 1935665213}
   - {fileID: 52557164}
+  - {fileID: 1782762900}
