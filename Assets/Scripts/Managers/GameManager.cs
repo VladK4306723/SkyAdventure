@@ -7,6 +7,7 @@ using Zenject;
 public interface IGameFlow
 {
     void StartGame(PlayerType playerType, int cost);
+    void Gameover();
     void FinishGame();
     void AbortGame();
     void PauseGame();
@@ -63,9 +64,10 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
 
     private void Start()
     {
+        _notificationService.Initialize();
         _notificationService.ApplySettings(
         GameSettings.DailyBonusReminder,
-        19,
+        18,
         0
     );
 
@@ -272,8 +274,6 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
         //_uiManager.Show(UIWindowId.GameOver);
     }
 
-
-
     public void AbortGame()
     {
         _isGameRunning = false;
@@ -298,6 +298,11 @@ public class GameManager : MonoBehaviour, IGameFlow, IGameManager
 
         _progress.EndSession(GameFinishReason.Completed);
 
+        CleanupGame();
+    }
+
+    public void Gameover()
+    {
         CleanupGame();
     }
 

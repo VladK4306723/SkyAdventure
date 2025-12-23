@@ -4,39 +4,24 @@ using UnityEngine.InputSystem;
 
 public sealed class PlayerView : MonoBehaviour
 {
-    [SerializeField] private float _tiltSensitivity;
-    [SerializeField] private float _deadZone = 0.05f;
+    [SerializeField] private float _tiltSensitivity = 3f;
+    [SerializeField] private float _deadZone = 0.08f;
+    [SerializeField] private float _smoothing = 10f;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     private PlayerInputActions _input;
 
-    private float _keyboardInput;
-    private float _gyroInput;
-    private float _accelInput;
+    private Vector3 _rawTilt;
+    private float _smoothedTilt;
 
-    public Transform Transform => transform;
+    private float _keyboardInput;
+    private float _finalInput;
+
+    private bool _hasAccel;
+
+    public float HorizontalInput => _finalInput;
 
     public event Action<ObstacleView> HitObstacle;
-
-    public float HorizontalInput
-    {
-        get
-        {
-#if UNITY_ANDROID || UNITY_IOS
-            if (_hasGyro)
-                return _gyroInput;
-
-            if (_hasAccel)
-                return _accelInput;
-#endif
-            return _keyboardInput;
-        }
-    }
-
-#if UNITY_ANDROID || UNITY_IOS
-    private bool _hasGyro;
-    private bool _hasAccel;
-#endif
 
     private void Awake()
     {
@@ -45,17 +30,16 @@ public sealed class PlayerView : MonoBehaviour
 
     private void OnEnable()
     {
-        _input.Player.Enable();
+        _input.Enable();
+
         _input.Player.Move.performed += OnMove;
         _input.Player.Move.canceled += OnMove;
 
+        _input.Player.Tilt.performed += OnTilt;
+        _input.Player.Tilt.canceled += OnTilt;
+
 #if UNITY_ANDROID || UNITY_IOS
-        _hasGyro = AttitudeSensor.current != null;
         _hasAccel = Accelerometer.current != null;
-
-        if (_hasGyro)
-            InputSystem.EnableDevice(AttitudeSensor.current);
-
         if (_hasAccel)
             InputSystem.EnableDevice(Accelerometer.current);
 #endif
@@ -65,57 +49,47 @@ public sealed class PlayerView : MonoBehaviour
     {
         _input.Player.Move.performed -= OnMove;
         _input.Player.Move.canceled -= OnMove;
-        _input.Player.Disable();
+
+        _input.Player.Tilt.performed -= OnTilt;
+        _input.Player.Tilt.canceled -= OnTilt;
+
+        _input.Disable();
     }
 
     private void Update()
     {
 #if UNITY_ANDROID || UNITY_IOS
-        if (_hasGyro)
+        if (!_hasAccel)
         {
-            UpdateGyro();
+            _finalInput = 0f;
             return;
         }
 
-        if (_hasAccel)
-        {
-            UpdateAccelerometer();
-            return;
-        }
-#endif
-    }
+        float raw = _rawTilt.x;
 
-    private void UpdateGyro()
-    {
-        Quaternion q = AttitudeSensor.current.attitude.ReadValue();
+        _smoothedTilt = Mathf.Lerp(_smoothedTilt, raw, Time.deltaTime * _smoothing);
 
-        float tilt =
-#if UNITY_IOS
-            q.x;
-#else
-            q.y;
-#endif
+        float value = _smoothedTilt * _tiltSensitivity;
 
-        _gyroInput = ApplyDeadZone(tilt * _tiltSensitivity);
-    }
-
-    private void UpdateAccelerometer()
-    {
-        Vector3 accel = Accelerometer.current.acceleration.ReadValue();
-        _accelInput = ApplyDeadZone(accel.x * _tiltSensitivity);
-    }
-
-    private float ApplyDeadZone(float value)
-    {
         if (Mathf.Abs(value) < _deadZone)
-            return 0f;
+            value = 0f;
 
-        return Mathf.Clamp(value, -1f, 1f);
+        _finalInput = Mathf.Clamp(value, -1f, 1f);
+#else
+        _finalInput = _keyboardInput;
+#endif
+    }
+
+    private void OnTilt(InputAction.CallbackContext ctx)
+    {
+        _rawTilt = ctx.ReadValue<Vector3>();
     }
 
     private void OnMove(InputAction.CallbackContext ctx)
     {
+#if UNITY_EDITOR || UNITY_STANDALONE
         _keyboardInput = ctx.ReadValue<float>();
+#endif
     }
 
     public void SetSprite(Sprite sprite)
@@ -131,8 +105,6 @@ public sealed class PlayerView : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.TryGetComponent<ObstacleView>(out var obstacle))
-        {
             HitObstacle?.Invoke(obstacle);
-        }
     }
 }

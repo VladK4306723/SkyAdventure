@@ -44,7 +44,7 @@ public class LooseWindowView : UIWindowBase
 
     private void OnHomeClicked()
     {
-        _gameFlow.AbortGame();
+        _gameFlow.Gameover();
         _uiManager.Show(UIWindowId.Home);
     }
 }

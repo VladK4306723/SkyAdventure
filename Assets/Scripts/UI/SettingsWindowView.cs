@@ -47,7 +47,7 @@ public sealed class SettingsWindowView : UIWindowBase
                 GameSettings.DailyBonusReminder = v;
                 GameSettings.Save();
 
-                _notificationService.ApplySettings(v, 18, 20);
+                _notificationService.ApplySettings(v, 18, 00);
             });
 
         FillFooter();
